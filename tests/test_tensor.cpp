@@ -127,14 +127,27 @@ NB_MODULE(test_tensor_ext, m) {
     });
 
     m.def("ret_array_scalar", []() {
-            float* f = new float[1] { 1 };
-            size_t shape[1] = {};
+        float* f = new float[1] { 1 };
+        size_t shape[1] = {};
 
-            nb::capsule deleter(f, [](void* data) noexcept {
-                destruct_count++;
-                delete[] (float *) data;
-            });
+        nb::capsule deleter(f, [](void* data) noexcept {
+            destruct_count++;
+            delete[] (float *) data;
+        });
 
-            return nb::tensor<nb::numpy, float>(f, 0, shape, deleter);
+        return nb::tensor<nb::numpy, float>(f, 0, shape, deleter);
     });
+
+    // This binding shows how to use a numpy tensor as default argument value,
+    // since "array"_a = nb::tensor<nb::numpy, ...>(...) does not work.
+    m.def("default_numpy", [](nb::object& o) {
+        static const size_t default_shape[1] = {3};
+        static int default_content[3] = {42, 43, 44};
+
+        if (!o.is_none()) {
+            return nb::cast<nb::tensor<nb::numpy, int, nb::shape<nb::any>>>(*o);
+        } else {
+            return nb::tensor<nb::numpy, int, nb::shape<nb::any>>(default_content, 1, default_shape);
+        }
+    }, "array"_a = nb::none());
 }

@@ -327,6 +327,7 @@ def test17_return_pytorch():
     collect()
     assert t.destruct_count() - dc == 1
 
+
 @needs_numpy
 def test18_return_array_scalar():
     collect()
@@ -336,3 +337,13 @@ def test18_return_array_scalar():
     del x
     collect()
     assert t.destruct_count() - dc == 1
+
+
+@needs_numpy
+def test19_default_numpy():
+    collect()
+    a = t.default_numpy(np.array([1, 2]))
+    assert np.all(a == [1, 2])
+    collect()
+    a = t.default_numpy()
+    assert np.all(a == [42, 43, 44])
